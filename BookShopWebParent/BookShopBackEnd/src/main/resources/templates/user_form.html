@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0,minimum-scale=1.0">
+
+<title>[[${pageTitle}]]</title>
+<link rel="stylesheet" type="text/css"
+	th:href="@{/webjars/bootstrap/4.3.1/css/bootstrap.min.css} " />
+<link rel="stylesheet" type="text/css"
+	th:href="@{/fontawesome/all.css} " />
+<link rel="stylesheet" type="text/css" th:href="@{/style.css} " />
+
+<script type="text/javascript"
+	th:src="@{/webjars/jquery/jquery.min.js} "></script>
+<script type="text/javascript"
+	th:src="@{/webjars/bootstrap/js/bootstrap.min.js} "></script>
+</head>
+<body>
+	<div class="container-fluid">
+		<div>
+			<nav th:replace="fragments :: navbar">
+			</nav>
+		</div>
+		<div class="">
+			<h1>Manager User | [[${pageTitle}]]</h1>
+		</div>
+		<form th:action="@{/users/save}" th:method="post"
+			style="max-width: 700px; margin: 0 auto"
+			enctype="multipart/form-data" 
+			th:object="${user}" onsubmit="return checkEmailUnique(this)">
+			<input type="hidden" th:field="*{id}" />
+			<div class="border border-secondary  rounded p-3">
+				<div class="form-group row">
+					<label class="col-sm-4 col-form-label">Email:</label>
+					<div class="col-sm-8">
+						<input type="email" class="form-control" th:field="*{email}"
+							required="required" minlength="8" maxlength="128" />
+					</div>
+				</div>
+
+				<div class="form-group row">
+					<label class="col-sm-4 col-form-label">First Name:</label>
+					<div class="col-sm-8">
+						<input type="text" class="form-control" th:field="*{firstName}"
+							required="required" minlength="2" maxlength="45" />
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-sm-4 col-form-label">Last Name:</label>
+					<div class="col-sm-8">
+						<input type="text" class="form-control" th:field="*{lastName}"
+							required="required" minlength="2" maxlength="45" />
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-sm-4 col-form-label">Password:</label>
+					<div class="col-sm-8">
+						<input th:if="${user.id == null}" type="password"
+							class="form-control" th:field="*{password}" required="required"
+							minlength="6" maxlength="64" /> <input
+							th:if="${user.id != null}" type="password" class="form-control"
+							th:field="*{password}" minlength="6" maxlength="64" />
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-sm-4 col-form-label">Roles:</label>
+					<div class="col-sm-8 ">
+						<th:block th:each="role: ${listRoles}">
+							<input type="checkbox" th:field="*{roles}" th:text="${role.name}"
+								th:value="${role.id}" class="m-2" />
+						- <small>[[${role.decription}]]</small>
+							<br />
+						</th:block>
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-sm-4 col-form-label">Enabled:</label>
+					<div class="col-sm-8">
+						<input type="checkbox" th:field="*{enabled}" />
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-sm-4 col-form-label">Photos:</label>
+					<div class="col-sm-8">
+						<input type="hidden" th:field="*{photos}"/>
+						<input type="file" id="fileImage" name="image" accept="image/png, image/jpeg" class="mb-2" />
+						<img id="thumbnail" alt="Photo preview" th:src="@{${user.photosImagePath}}" class="img-fluid" />
+					</div>
+				</div>
+				<div class="text-center">
+					<input type="submit" value="Save" class="btn btn-primary m-3" /> <input
+						type="button" value="Cancel" class="btn btn-secondary"
+						id="btnCancel" />
+				</div>
+
+				<div class="modal fade text-center" id="modalDialog">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h4 class="modal-title" id="modalTitle">Warning</h4>
+								<button type="button" class="close" data-dismiss="modal">&times;</button>
+							</div>
+							<div class="modal-body">
+								<span id="modalBody"></span>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-danger"
+									data-dismiss="modal">Close</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script type="text/javascript">
+		$(document)
+				.ready(
+						function() {
+							$("#btnCancel").on("click", function() {
+								window.location = "[[@{/users}]]";
+							});
+
+							$("#fileImage").change(function() {
+								fileSize = this.files[0].size;
+								//alert("File size: " + fileSize);
+
+								if (fileSize > 1024576) {
+									this.setCustomValidity("You must choose an image less than 1MB!");
+									this.reportvalidity();
+								} else {
+									showImageThumbnail(this);
+								}
+
+							});
+
+						});
+
+		function showImageThumbnail(fileInput) {
+			var file = fileInput.files[0];
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				$("#thumbnail").attr("src", e.target.result);
+			};
+			reader.readAsDataURL(file);
+		}
+
+		function checkEmailUnique(form) {
+			url = "[[@{/users/check_email}]]";
+			userEmail = $("#email").val();
+			userId = $("#id").val();
+			csrfValue = $("input[name='_csrf']").val();
+			params = {
+				id : userId,
+				email : userEmail,
+				_csrf : csrfValue
+			};
+			$.post(
+					url,
+					params,
+					function(response) {
+						if (response == "OK") {
+							form.submit();
+						} else if (response == "Duplicated") {
+							showModalDialog("Warning",
+									"There is another user having the email: "
+											+ userEmail);
+						} else {
+							showModalDialog("Error",
+									"Unknow response from server");
+						}
+					}).fail(function() {
+				showModalDialog("Error", "Could not connect to server");
+			}
+
+			);
+			return false;
+		};
+		function showModalDialog(title, message) {
+			$("#modalTitle").text(title);
+			$("#modalBody").text(message);
+			$("#modalDialog").modal();
+		};
+	</script>
+</body>
+</html>

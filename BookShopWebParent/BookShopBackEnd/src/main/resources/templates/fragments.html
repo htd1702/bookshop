@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+	<nav th:fragment="navbar" class="navbar navbar-expand-lg bg-dark navbar-dark">
+		<a class="navbar-brand" th:href="@{/}"> <img alt=""
+			th:src="@{/images/ShopmeAdminSmall.png}">
+		</a>
+		<button class="navbar-toggler collapsed" type="button"
+			data-toggle="collapse" data-target="#topNavbar" aria-expanded="false">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="topNavbar">
+			<ul class="navbar-nav">
+				<li class="nav-item"><a class="nav-link" th:href="@{/users}">Users</a>
+				</li>
+				<li class="nav-item"><a class="nav-link"
+					th:href="@{/categories}">Categories</a></li>
+				<li class="nav-item"><a class="nav-link" th:href="@{/brands}">Brands</a>
+				</li>
+				<li class="nav-item"><a class="nav-link"
+					th:href="@{/products}">Products</a></li>
+				<li class="nav-item"><a class="nav-link"
+					th:href="@{/customers}">Customers</a></li>
+				<li class="nav-item"><a class="nav-link"
+					th:href="@{/shipping}">Shipping</a></li>
+				<li class="nav-item"><a class="nav-link"
+					th:href="@{/customers}">Orders</a></li>
+				<li class="nav-item"><a class="nav-link" th:href="@{/report}">Sale
+						Report</a></li>
+				<li class="nav-item"><a class="nav-link"
+					th:href="@{/articles}">Articles</a></li>
+				<li class="nav-item"><a class="nav-link" th:href="@{/menus}">Menus</a>
+				</li>
+				<li class="nav-item"><a class="nav-link"
+					th:href="@{/settings}">Settings</a></li>
+			</ul>
+
+		</div>
+	</nav>
+
+
+
+	<th th:fragment="column_link(fieldName, columnLabel, removeTag)" th:remove="${removeTag}">
+		<a class="text-white"
+			th:href="@{'/users/page/' + ${currentPage} + '?sortField=' + ${fieldName} + '&sortDir=' + ${sortField != fieldName ? sortDir : reverseSortDir} + ${keyword != null ? '&keyword=' + keyword : '' }}">
+			[[${columnLabel}]]
+		</a>
+		<span th:if="${sortField == fieldName}" 
+				th:class="${sortDir == 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'}"></span>
+	</th>
+	
+	<a  th:fragment="page_link(pageNum, label)"
+		class="page-link" 
+		th:href="@{'/users/page/' + ${pageNum} + '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir} + ${keyword != null ? '&keyword=' + keyword : '' }}">
+		[[${label}]]
+	</a>
+	
+	<td th:fragment="button">
+		<a class="fas fa-edit fa-2x icon-green"
+			th:href="@{'/users/edit/'+ ${user.id}}" title="Edit this user">
+		</a>
+
+		&nbsp; 
+		<a class="fas fa-trash fa-2x icon-red deleteDialog"
+			th:href="@{'/users/delete/'+ ${user.id}}" th:userId="${user.id}"
+			title="Delete this user">
+		</a>
+	</td>
+	
+</body>
+</html>
